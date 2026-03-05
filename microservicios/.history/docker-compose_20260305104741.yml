@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  books:
+    build: D
+    volumes:
+      - catalog-data:/data
+    networks:
+      - library-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  borrowing-service:
+    build: ./borrowing-service
+    volumes:
+      - borrowing-data:/data
+    networks:
+      - library-network
+    depends_on:
+      - catalog-service
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  user-service:
+    build: ./user-service
+    volumes:
+      - user-data:/data
+    networks:
+      - library-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  notification-service:
+    build: ./notification-service
+    networks:
+      - library-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  catalog-data:
+  borrowing-data:
+  user-data:
+
+networks:
+  library-network:
+    driver: bridge
